@@ -1,10 +1,5 @@
-export default defineNuxtRouteMiddleware(async () => {
-  const { isLoggedIn, isAdmin, fetchMe } = useAuth()
-
-  if (!isLoggedIn.value && import.meta.client) {
-    await fetchMe()
-  }
-
+export default defineNuxtRouteMiddleware(() => {
+  const { isLoggedIn, isAdmin } = useAuth()
   if (isLoggedIn.value) {
     return navigateTo(isAdmin.value ? '/admin' : '/dashboard')
   }

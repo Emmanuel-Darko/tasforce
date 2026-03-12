@@ -45,6 +45,7 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'dashboard', middleware: ['auth','admin'] })
+const toggleSidebar = inject<() => void>('toggleSidebar')
 const { data: stats } = await useFetch<any>('/api/admin/stats')
 const t = computed(() => (stats.value as any)?.total || 1)
 const pct = (n: number) => Math.round((n / t.value) * 100)

@@ -1,8 +1,9 @@
-export default defineNuxtPlugin(async (nuxtApp) => {
-  // Only run on client side to avoid SSR/hydration mismatch
-  if (import.meta.server) return
-
+export default defineNuxtPlugin(async () => {
+  // Capture the request-bound fetch function SYNCHRONOUSLY (before any await).
+  // This preserves the Nuxt composable context so SSR forwards the browser cookie.
+  const fetcher = useRequestFetch()
   const { fetchMe } = useAuth()
-  // Fetch user state once on app load — prevents the auth flash on refresh
-  await fetchMe()
+
+  // callOnce runs on SSR and is skipped on client hydration (state is already in payload).
+  await callOnce('auth:init', () => fetchMe(fetcher as any))
 })

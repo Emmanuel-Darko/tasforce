@@ -1,13 +1,14 @@
 export const useAuthUser = () => useState<Record<string, any> | null>('auth.user', () => null)
 
 export function useAuth() {
-  const user       = useAuthUser()
+  const user = useAuthUser()
   const isLoggedIn = computed(() => !!user.value)
-  const isAdmin    = computed(() => ['admin','superadmin'].includes(user.value?.role ?? ''))
+  const isAdmin = computed(() => ['admin', 'superadmin'].includes(user.value?.role ?? ''))
 
-  async function fetchMe() {
+  async function fetchMe(fetcher?: typeof $fetch) {
+    const doFetch = fetcher ?? $fetch
     try {
-      const data = await $fetch('/api/auth/me') as any
+      const data = await doFetch('/api/auth/me') as any
       user.value = data.user
     } catch { user.value = null }
   }

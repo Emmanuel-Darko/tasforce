@@ -84,37 +84,27 @@
 
         <div class="tf-card-back-body">
 
-          <!-- Real QR Code -->
+          <!-- QR Code: use stored server-generated code, fallback to client-generated -->
           <div class="tf-card-qr">
             <img
-              v-if="member.qrCode"
-              :src="member.qrCode"
+              v-if="resolvedQr"
+              :src="resolvedQr"
               alt="QR Code"
               style="width:100%;height:100%;object-fit:contain;display:block;"
             />
-            <!-- Placeholder grid when no QR issued yet -->
-            <div v-else class="tf-card-qr-placeholder">
-              <div v-for="n in 49" :key="n"
-                :style="`background:${qrPlaceholder.includes(n) ? 'var(--crimson-deep)' : 'var(--cream)'};border-radius:1px;`"
-              />
-            </div>
+            <canvas v-else ref="qrCanvas" style="width:100%;height:100%;display:block;" />
           </div>
 
-          <!-- Real Barcode -->
+          <!-- Barcode: use stored server-generated code, fallback to client-generated -->
           <div class="tf-card-barcode-wrap">
             <div class="tf-card-barcode" style="border-radius:6px;overflow:hidden;">
               <img
-                v-if="member.barcode"
-                :src="member.barcode"
+                v-if="resolvedBarcode"
+                :src="resolvedBarcode"
                 alt="Barcode"
                 style="width:100%;height:44px;object-fit:fill;display:block;"
               />
-              <!-- Placeholder bars when not yet issued -->
-              <div v-else style="display:flex;gap:1.5px;align-items:stretch;height:44px;background:#2D0008;padding:5px 8px;">
-                <div v-for="n in 38" :key="n"
-                  :style="`flex:${thickBars.includes(n) ? 3 : 1};background:rgba(245,230,208,${thickBars.includes(n) ? 0.85 : 0.12});border-radius:1px;`"
-                />
-              </div>
+              <canvas v-else ref="barcodeCanvas" style="width:100%;height:44px;display:block;" />
             </div>
             <div class="tf-card-bid">{{ member.memberId || 'PENDING' }}</div>
             <div class="tf-card-back-note">
@@ -137,13 +127,56 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{ member: Record<string, any> }>()
+const props = defineProps<{ member: Record<string, any> }>()
 
-// Decorative placeholder QR pattern (positions 1–49 in a 7×7 grid)
-const qrPlaceholder = [1,2,3,4,5,6,7,8,14,15,21,22,28,29,35,36,42,43,44,45,46,47,48,49,9,16,23,25,32,39,4,25,46]
+const qrCanvas      = ref<HTMLCanvasElement | null>(null)
+const barcodeCanvas = ref<HTMLCanvasElement | null>(null)
 
-// Decorative barcode thick bars
-const thickBars = [2,5,9,13,17,21,25,28,32,36]
+// Prefer server-generated codes stored on member, fall back to client generation
+const resolvedQr      = computed(() => props.member.qrCode      || null)
+const resolvedBarcode = computed(() => props.member.barcode      || null)
+
+// If neither server code exists, draw fallback on canvas client-side
+onMounted(async () => {
+  if (!props.member.memberId) return
+
+  // QR Code fallback (only if no server-stored qrCode)
+  if (!resolvedQr.value && qrCanvas.value) {
+    try {
+      // Use a lightweight inline QR generator via Google Charts API
+      // (avoids bundling a heavy QR lib client-side)
+      const verifyUrl = `https://tas-force.org/verify/${props.member.memberId}`
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => {
+        if (qrCanvas.value) {
+          const ctx = qrCanvas.value.getContext('2d')
+          qrCanvas.value.width  = 200
+          qrCanvas.value.height = 200
+          ctx?.drawImage(img, 0, 0, 200, 200)
+        }
+      }
+      img.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(verifyUrl)}&color=2D0008&bgcolor=F5E6D0&margin=1`
+    } catch (e) { /* silent */ }
+  }
+
+  // Barcode fallback (only if no server-stored barcode)
+  if (!resolvedBarcode.value && barcodeCanvas.value) {
+    try {
+      const img = new Image()
+      img.crossOrigin = 'anonymous'
+      img.onload = () => {
+        if (barcodeCanvas.value) {
+          const ctx = barcodeCanvas.value.getContext('2d')
+          barcodeCanvas.value.width  = 400
+          barcodeCanvas.value.height = 80
+          ctx?.drawImage(img, 0, 0, 400, 80)
+        }
+      }
+      img.src = `https://barcode.tec-it.com/barcode.ashx?DATA=${encodeURIComponent(props.member.memberId)}&TYPE=Code128&UNIT=Fit&WIDTH=400&HEIGHT=80&TRANSPARENTBG=True&BACKCOLOR=2D0008&BARCOLOR=F5E6D0&TEXTCOLOR=F5E6D0`
+    } catch (e) { /* silent */ }
+  }
+})
 </script>
 
 <style scoped>

@@ -93,9 +93,25 @@
             <textarea class="f-textarea" rows="4" placeholder="Tell us your motivation for joining TAS-FORCE…" v-model="f.motivation" />
           </div>
           <div class="field"><label>Referred By (Member ID)</label><input type="text" class="f-input" placeholder="TF-XXXX-XXXX" v-model="f.referredBy" /></div>
-          <div class="field">
-            <label>Profile Photo URL</label>
-            <input type="url" class="f-input" placeholder="https://…" v-model="f.photoUrl" />
+          <div class="field col-span-2">
+            <label>Profile Photo</label>
+            <div style="display:flex;gap:8px;margin-bottom:10px;">
+              <button type="button" class="btn btn-sm" :class="photoMode==='url'?'btn-crimson':'btn-outline'" @click="photoMode='url'">Paste URL</button>
+              <button type="button" class="btn btn-sm" :class="photoMode==='upload'?'btn-crimson':'btn-outline'" @click="photoMode='upload'">Upload Photo</button>
+            </div>
+            <template v-if="photoMode==='url'">
+              <input type="url" class="f-input" placeholder="https://…" v-model="f.photoUrl" />
+            </template>
+            <template v-else>
+              <div style="position:relative;">
+                <input type="file" accept="image/*" class="f-input" @change="handleFileUpload" style="padding:10px;" />
+              </div>
+            </template>
+            <div v-if="f.photoUrl" style="margin-top:10px;display:flex;align-items:center;gap:12px;">
+              <img :src="f.photoUrl" alt="Preview" style="width:56px;height:56px;border-radius:10px;object-fit:cover;border:2px solid var(--border);" />
+              <span style="font-size:12px;color:var(--muted);">Photo preview</span>
+              <button type="button" style="margin-left:auto;background:none;border:none;color:var(--danger);cursor:pointer;font-size:13px;" @click="f.photoUrl=''">Remove</button>
+            </div>
             <span class="hint">Optional — used on your membership card</span>
           </div>
         </div>
@@ -137,6 +153,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'auth', middleware: 'guest' })
 const step = ref(1), loading = ref(false), error = ref(''), submitted = ref(false)
+const photoMode = ref<'url'|'upload'>('url')
 const f = reactive({
   firstName:'', lastName:'', email:'', phone:'', country:'', city:'',
   dateOfBirth:'', gender:'', occupation:'',
@@ -144,6 +161,14 @@ const f = reactive({
   motivation:'', referredBy:'', photoUrl:'',
   password:'', confirmPassword:'',
 })
+function handleFileUpload(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  if (file.size > 2 * 1024 * 1024) { error.value = 'Photo must be under 2MB.'; return }
+  const reader = new FileReader()
+  reader.onload = () => { f.photoUrl = reader.result as string }
+  reader.readAsDataURL(file)
+}
 const nextSteps = [
   'Admin reviews your application (usually within 24–48 hours).',
   'You receive an approval email with your Member ID.',

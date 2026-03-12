@@ -55,5 +55,6 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'dashboard', middleware: ['auth','admin'] })
+const toggleSidebar = inject<() => void>('toggleSidebar')
 const saved = ref(false)
 </script>

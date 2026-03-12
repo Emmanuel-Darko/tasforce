@@ -59,6 +59,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'dashboard', middleware: 'auth' })
 const { user } = useAuth()
+const toggleSidebar = inject<() => void>('toggleSidebar')
 const today    = new Date().toLocaleDateString('en-GB', { weekday:'long', year:'numeric', month:'long', day:'numeric' })
 const statusMessage = computed(() => {
   if (user.value?.status === 'active')  return 'Your membership is active and in good standing.'

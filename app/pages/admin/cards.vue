@@ -31,6 +31,7 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'dashboard', middleware: ['auth','admin'] })
+const toggleSidebar = inject<() => void>('toggleSidebar')
 const loading = ref(false), members = ref<any[]>([])
 onMounted(async () => {
   loading.value = true

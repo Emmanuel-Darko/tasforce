@@ -1,6 +1,7 @@
 <template>
   <div>
     <div class="topbar">
+      <button class="topbar-menu" @click="toggleSidebar?.()">☰</button>
       <h1 class="topbar-title">My Profile</h1>
     </div>
     <div class="page-body">
@@ -26,4 +27,5 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'dashboard', middleware: 'auth' })
 const { user } = useAuth()
+const toggleSidebar = inject<() => void>('toggleSidebar')
 </script>

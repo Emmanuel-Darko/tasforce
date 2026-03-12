@@ -12,7 +12,7 @@
         <div class="notice notice-info" style="margin-bottom:28px;">
           <span>ℹ</span><span>Donation processing will be available soon. Thank you for your interest in supporting TAS-FORCE.</span>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:32px;">
           <div v-for="a in amounts" :key="a" class="card" style="text-align:center;padding:24px;cursor:pointer;">
             <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--crimson);">GH₵{{ a }}</div>
             <div style="font-size:13px;color:var(--muted);margin-top:4px;">One-time gift</div>
