@@ -1,6 +1,6 @@
 <template>
   <div>
-    <section class="pg-hero">
+    <section class="pg-hero pg-hero--padded">
       <img src="https://images.unsplash.com/photo-1529390079861-591de354faf5?w=1400&q=80&auto=format&fit=crop" alt="Get Involved" class="pg-hero-bg" />
       <div class="pg-hero-overlay" />
       <div class="container pg-hero-inner">
@@ -73,5 +73,10 @@ const options = [
 @media (max-width:768px) {
   .gi-grid { grid-template-columns:1fr; }
   .pg-hero { min-height:260px; }
+}
+@media (max-width: 600px) {
+  .pg-hero--padded .pg-hero-inner {
+    padding: 40px 18px !important;
+  }
 }
 </style>

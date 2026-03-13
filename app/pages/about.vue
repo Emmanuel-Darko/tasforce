@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Hero Banner -->
-    <section class="pg-hero">
+    <section class="pg-hero pg-hero--padded">
       <img src="https://images.unsplash.com/photo-1531206715517-5c0ba140b2b8?w=1400&q=80&auto=format&fit=crop" alt="About TAS-FORCE" class="pg-hero-bg" />
       <div class="pg-hero-overlay" />
       <div class="container pg-hero-inner">
@@ -156,5 +156,10 @@ const work = [
   .pg-cards-3 { grid-template-columns:1fr; }
   .pg-hero { min-height:260px; }
   .pg-img-float { position:static; width:100%; margin-top:16px; height:180px; border:0; }
+}
+@media (max-width: 600px) {
+  .pg-hero--padded .pg-hero-inner {
+    padding: 40px 18px !important;
+  }
 }
 </style>

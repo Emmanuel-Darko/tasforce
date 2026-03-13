@@ -1,6 +1,6 @@
 <template>
   <div>
-    <section class="pg-hero">
+    <section class="pg-hero pg-hero--padded">
       <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1400&q=80&auto=format&fit=crop" alt="Our Campaigns" class="pg-hero-bg" />
       <div class="pg-hero-overlay" />
       <div class="container pg-hero-inner">
@@ -85,5 +85,10 @@ const campaigns = [
 @media (max-width:768px) {
   .camp-grid { grid-template-columns:1fr; }
   .pg-hero { min-height:260px; }
+}
+@media (max-width: 600px) {
+  .pg-hero--padded .pg-hero-inner {
+    padding: 40px 18px !important;
+  }
 }
 </style>
