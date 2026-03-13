@@ -1,7 +1,7 @@
 <template>
   <div>
     <section class="pg-hero">
-      <img src="https://images.unsplash.com/photo-1504711434969-e33886168d4c?w=1400&q=80&auto=format&fit=crop" alt="News" class="pg-hero-bg" />
+      <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?w=1400&q=80&auto=format&fit=crop" alt="Global activism - news hero background" class="pg-hero-bg" />
       <div class="pg-hero-overlay" />
       <div class="container pg-hero-inner">
         <div class="pg-hero-eyebrow">Latest Updates</div>
