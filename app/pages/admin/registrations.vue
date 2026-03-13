@@ -17,7 +17,7 @@
         <div class="table-ctrl">
           <div class="search-wrap">
             <span class="search-icon">🔍</span>
-            <input type="search" class="f-input" placeholder="Search name, email or ID…" v-model="search" @input="load" style="width:280px;" />
+            <input type="search" class="f-input search-input" placeholder="Search name, email or ID…" v-model="search" @input="load" />
           </div>
         </div>
         <div v-if="loading" style="padding:48px;text-align:center;color:var(--muted);">Loading…</div>
@@ -41,15 +41,15 @@
                     </div>
                   </div>
                 </td>
-                <td><span class="badge badge-type">{{ m.membershipType }}</span></td>
-                <td class="td-muted">{{ m.country || '—' }}</td>
-                <td class="td-muted">{{ new Date(m.createdAt).toLocaleDateString('en-GB') }}</td>
-                <td>
+                <td data-label="Type"><span class="badge badge-type">{{ m.membershipType }}</span></td>
+                <td data-label="Country" class="td-muted">{{ m.country || '—' }}</td>
+                <td data-label="Applied" class="td-muted">{{ new Date(m.createdAt).toLocaleDateString('en-GB') }}</td>
+                <td data-label="Status">
                   <span :class="`badge badge-${m.status === 'active' ? 'active' : m.status === 'pending' ? 'pending' : 'inactive'}`">
                     <span class="bdot" />{{ m.status === 'active' ? 'Approved' : m.status }}
                   </span>
                 </td>
-                <td>
+                <td data-label="Actions">
                   <div style="display:flex;gap:6px;">
                     <button v-if="m.status === 'pending'" class="btn btn-crimson btn-sm" :disabled="acting === m.id" @click="approve(m)">
                       {{ acting === m.id ? '…' : 'Approve' }}
@@ -277,3 +277,13 @@ async function submitAdd() {
 
 onMounted(load)
 </script>
+
+<style scoped>
+.search-input { width: 280px; }
+@media (max-width: 640px) {
+  .search-input { width: 100%; }
+  .table-ctrl { flex-direction: column; gap: 12px; }
+  .member-cell { flex-direction: row; align-items: center; }
+  .tabs { overflow-x: auto; white-space: nowrap; padding-bottom: 4px; }
+}
+</style>

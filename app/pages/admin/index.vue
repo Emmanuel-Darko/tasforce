@@ -32,7 +32,7 @@
               <NuxtLink v-for="a in actions" :key="a.to" :to="a.to"
                 style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border-light);text-decoration:none;transition:background 0.12s;"
                 onmouseover="this.style.background='var(--parchment)'" onmouseout="this.style.background=''">
-                <div style="width:38px;height:38px;background:rgba(107,15,26,0.08);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:1px solid rgba(107,15,26,0.1);">{{ a.icon }}</div>
+                <div style="width:38px;height:38px;background:rgba(45,27,105,0.08);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:1px solid rgba(45,27,105,0.1);">{{ a.icon }}</div>
                 <div style="flex:1;min-width:0;">
                   <div style="font-size:14px;font-weight:600;color:var(--crimson);">{{ a.name }}</div>
                   <div style="font-size:12px;color:var(--muted2);">{{ a.desc }}</div>

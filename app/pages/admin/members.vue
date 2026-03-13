@@ -207,3 +207,12 @@ function exportCSV() {
   URL.revokeObjectURL(url)
 }
 </script>
+
+<style scoped>
+@media (max-width: 640px) {
+  .table-ctrl { flex-direction: column; align-items: stretch; gap: 12px; }
+  .table-ctrl .search-wrap { max-width: none !important; }
+  .table-ctrl .f-select { width: 100% !important; }
+  .member-cell { flex-direction: row; align-items: center; }
+}
+</style>
