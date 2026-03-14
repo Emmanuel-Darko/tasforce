@@ -28,7 +28,7 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    preset: 'netlify',
+    preset: 'node-server',
     // Ensure server-only packages stay server-side
     externals: {
       inline: ['bwip-js', 'qrcode']

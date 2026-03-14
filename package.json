@@ -5,32 +5,34 @@
   "scripts": {
     "dev": "nuxt dev",
     "build": "nuxt build",
+    "start": "node .output/server/index.mjs",
     "preview": "nuxt preview",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed": "npx tsx server/db/seed.ts"
   },
   "dependencies": {
-    "nuxt": "^4.0.0",
-    "vue": "^3.5.0",
     "@pinia/nuxt": "^0.11.0",
-    "pinia": "^3.0.0",
-    "drizzle-orm": "^0.44.0",
-    "@neondatabase/serverless": "^0.10.0",
-    "jose": "^5.10.0",
     "bcryptjs": "^3.0.2",
-    "qrcode": "^1.5.4",
     "bwip-js": "^4.5.0",
+    "drizzle-orm": "^0.44.0",
+    "jose": "^5.10.0",
+    "nuxt": "^4.0.0",
+    "pg": "^8.20.0",
+    "pinia": "^3.0.0",
+    "qrcode": "^1.5.4",
     "resend": "^4.5.0",
-    "zod": "^3.24.0",
-    "sharp": "^0.33.0"
+    "sharp": "^0.33.0",
+    "vue": "^3.5.0",
+    "zod": "^3.24.0"
   },
   "devDependencies": {
     "@nuxt/devtools": "latest",
-    "drizzle-kit": "^0.31.0",
     "@types/bcryptjs": "^2.4.6",
+    "@types/pg": "^8.18.0",
     "@types/qrcode": "^1.5.5",
-    "typescript": "^5.7.0",
-    "dotenv": "^16.0.0"
+    "dotenv": "^16.0.0",
+    "drizzle-kit": "^0.31.0",
+    "typescript": "^5.7.0"
   }
 }
