@@ -1,32 +1,37 @@
 <template>
-  <div class="aw">
-    <h2 class="aw-title">Welcome back</h2>
-    <p class="aw-sub">Sign in to your TAS-FORCE account.</p>
+  <div class="lf-wrap">
 
-    <div v-if="error" class="aw-error">
-      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><line x1="10" y1="7" x2="10" y2="10"/><circle cx="10" cy="13.5" r=".5" fill="currentColor"/></svg>
+    <div class="lf-header">
+      <h2 class="lf-title">Welcome back</h2>
+      <p class="lf-sub">Sign in to your TAS-FORCE account to continue.</p>
+    </div>
+
+    <div v-if="error" class="lf-error">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><line x1="10" y1="6.5" x2="10" y2="10.5"/><circle cx="10" cy="13.5" r=".6" fill="currentColor" stroke="none"/></svg>
       {{ error }}
     </div>
 
-    <div class="aw-fields">
-      <div class="aw-field">
-        <label class="aw-label">Email Address <span class="aw-req">*</span></label>
-        <input type="email" class="aw-input" placeholder="you@email.com" v-model="email" @keyup.enter="submit" />
+    <div class="lf-fields">
+      <div class="lf-field">
+        <label class="lf-label">Email Address <span class="lf-req">*</span></label>
+        <input type="email" class="lf-input" placeholder="you@email.com" v-model="email" @keyup.enter="submit" />
       </div>
-      <div class="aw-field">
-        <label class="aw-label">Password <span class="aw-req">*</span></label>
-        <input type="password" class="aw-input" placeholder="Your password" v-model="password" @keyup.enter="submit" />
+      <div class="lf-field">
+        <label class="lf-label">Password <span class="lf-req">*</span></label>
+        <input type="password" class="lf-input" placeholder="Your password" v-model="password" @keyup.enter="submit" />
       </div>
     </div>
 
-    <button class="aw-btn-primary" :disabled="loading" @click="submit">
-      <span v-if="loading" class="aw-spinner" />
+    <button class="lf-btn" :disabled="loading" @click="submit">
+      <span v-if="loading" class="lf-spinner" />
       {{ loading ? 'Signing in…' : 'Sign In' }}
     </button>
 
-    <p class="aw-footer-text">
+    <div class="lf-divider"><span>or</span></div>
+
+    <p class="lf-foot">
       Not a member yet?
-      <NuxtLink to="/auth/register" class="aw-link">Join TAS-FORCE →</NuxtLink>
+      <NuxtLink to="/auth/register" class="lf-link">Apply for membership →</NuxtLink>
     </p>
   </div>
 </template>
@@ -34,7 +39,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'auth', middleware: 'guest' })
 const { login } = useAuth()
-const route      = useRoute()
+const route = useRoute()
 const email = ref(''), password = ref(''), loading = ref(false), error = ref('')
 
 async function submit() {
@@ -43,7 +48,7 @@ async function submit() {
   loading.value = true
   try {
     const data = await login(email.value, password.value) as any
-    const dest  = (route.query.redirect as string) || (data.user.role !== 'member' ? '/admin' : '/dashboard')
+    const dest = (route.query.redirect as string) || (data.user.role !== 'member' ? '/admin' : '/dashboard')
     await navigateTo(dest)
   } catch (e: any) {
     error.value = e?.data?.message || 'Login failed. Please try again.'
@@ -52,48 +57,78 @@ async function submit() {
 </script>
 
 <style scoped>
-.aw { width: 100%; max-width: 420px; }
+.lf-wrap {
+  width: 100%;
+  max-width: 400px;
+  background: var(--white);
+  border-radius: 20px;
+  padding: 36px 36px 32px;
+  box-shadow: 0 4px 32px rgba(61,0,0,.1), 0 1px 4px rgba(61,0,0,.06);
+  border: 1px solid var(--border-light);
+}
 
-.aw-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
-.aw-sub   { font-size: 15px; color: var(--muted); margin-bottom: 26px; line-height: 1.55; }
+.lf-header { margin-bottom: 28px; }
+.lf-title  { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; color: var(--crimson); margin-bottom: 6px; }
+.lf-sub    { font-size: 14px; color: var(--muted); line-height: 1.55; }
 
-/* Error */
-.aw-error { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #fdf2f2; border: 1.5px solid #f5c0c0; border-radius: 10px; font-size: 14px; color: #7a0000; margin-bottom: 20px; }
-.aw-error svg { width: 18px; height: 18px; flex-shrink: 0; color: #c0392b; }
+.lf-error  {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; background: #fff0f0;
+  border: 1.5px solid #f5c0c0; border-radius: 10px;
+  font-size: 13px; color: #7a0000; margin-bottom: 20px;
+}
+.lf-error svg { width: 17px; height: 17px; flex-shrink: 0; color: #c0392b; }
 
-/* Fields */
-.aw-fields { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
-.aw-field  { display: flex; flex-direction: column; gap: 5px; }
-.aw-label  { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text-mid, #3d2e4a); }
-.aw-req    { color: var(--danger, #8b0000); }
-.aw-input  {
-  background: var(--white); border: 1.5px solid var(--border, #ddd5e0);
-  border-radius: 10px; padding: 12px 14px;
-  font-family: 'Crimson Pro', serif; font-size: 15px; color: var(--text);
-  outline: none; width: 100%;
+.lf-fields { display: flex; flex-direction: column; gap: 16px; margin-bottom: 22px; }
+.lf-field  { display: flex; flex-direction: column; gap: 6px; }
+.lf-label  { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-mid); }
+.lf-req    { color: var(--danger); }
+.lf-input  {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 15px;
+  color: var(--text);
+  outline: none;
+  width: 100%;
   transition: border-color .18s, box-shadow .18s;
 }
-.aw-input::placeholder { color: var(--muted2, #9a8fa8); }
-.aw-input:focus { border-color: var(--crimson, #2D1B69); box-shadow: 0 0 0 3px rgba(45,27,105,.1); }
+.lf-input::placeholder { color: var(--muted2); }
+.lf-input:focus { border-color: var(--crimson); box-shadow: 0 0 0 3px rgba(107,15,26,.1); background: #fffaf8; }
 
-/* Primary button */
-.aw-btn-primary {
-  width: 100%; padding: 13px; border-radius: 10px;
-  background: linear-gradient(135deg, var(--crimson, #2D1B69), var(--crimson2, #3E2A82));
-  color: var(--cream, #f5e6d0); font-family: 'Crimson Pro', serif;
-  font-size: 16px; font-weight: 700; border: none; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  box-shadow: 0 2px 14px rgba(45,27,105,.3);
-  transition: transform .22s, box-shadow .22s, opacity .2s;
-  margin-bottom: 18px;
+.lf-btn {
+  width: 100%; padding: 13px;
+  background: var(--crimson);
+  color: var(--cream);
+  font-family: 'Playfair Display', serif;
+  font-size: 16px; font-weight: 700;
+  border: none; border-radius: 10px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 2px 12px rgba(107,15,26,.3);
+  transition: background .2s, transform .2s, box-shadow .2s;
+  letter-spacing: .03em;
 }
-.aw-btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(45,27,105,.4); }
-.aw-btn-primary:disabled { opacity: .65; cursor: not-allowed; }
+.lf-btn:hover:not(:disabled) { background: var(--crimson2); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(107,15,26,.38); }
+.lf-btn:disabled { opacity: .6; cursor: not-allowed; }
 
-.aw-spinner { width: 16px; height: 16px; border: 2px solid rgba(245,230,208,.3); border-top-color: var(--cream, #f5e6d0); border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.lf-spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2.5px solid rgba(245,230,208,.3);
+  border-top-color: var(--cream);
+  animation: lfSpin .7s linear infinite; flex-shrink: 0;
+}
+@keyframes lfSpin { to { transform: rotate(360deg); } }
 
-.aw-footer-text { font-size: 15px; color: var(--muted); text-align: center; }
-.aw-link { color: var(--crimson, #2D1B69); font-weight: 600; text-decoration: none; }
-.aw-link:hover { text-decoration: underline; }
+.lf-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 22px 0; color: var(--muted2); font-size: 12px;
+}
+.lf-divider::before,
+.lf-divider::after { content: ''; flex: 1; height: 1px; background: var(--border-light); }
+
+.lf-foot { font-size: 14px; color: var(--muted); text-align: center; }
+.lf-link { color: var(--crimson); font-weight: 600; text-decoration: none; }
+.lf-link:hover { text-decoration: underline; }
 </style>
