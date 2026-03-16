@@ -3,7 +3,11 @@
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:12px;">
         <button class="topbar-menu" @click="toggleSidebar?.()">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="2" y1="5" x2="18" y2="5"/><line x1="2" y1="10" x2="18" y2="10"/><line x1="2" y1="15" x2="18" y2="15"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="24" height="24">
+            <line x1="2" y1="5" x2="18" y2="5"/>
+            <line x1="2" y1="10" x2="18" y2="10"/>
+            <line x1="2" y1="15" x2="18" y2="15"/>
+          </svg>
         </button>
         <h1 class="topbar-title">Registrations</h1>
       </div>
@@ -68,7 +72,7 @@
                       {{ acting === m.id ? '…' : 'Approve' }}
                     </button>
                     <button v-if="m.status === 'pending'" class="btn btn-danger btn-sm" :disabled="acting === m.id" @click="reject(m)">Reject</button>
-                    <button v-if="m.status !== 'pending'" class="btn btn-outline btn-sm">View</button>
+                    <button v-if="m.status !== 'pending'" class="btn btn-outline btn-sm" @click="openView(m)">View</button>
                   </div>
                 </td>
               </tr>
@@ -84,16 +88,16 @@
 
     <!-- ADD MODAL -->
     <Teleport to="body">
-      <div v-if="showAdd" class="modal-root">
-        <div class="modal-bg" @click="showAdd=false" />
-        <div class="modal-box modal-box--wide">
-          <div class="modal-head">
-            <div class="modal-title">Register New Member</div>
-            <button class="modal-close" @click="showAdd=false">
+      <div v-if="showAdd" class="ad-modal-root">
+        <div class="ad-modal-bg" @click="showAdd=false" />
+        <div class="ad-modal ad-modal-wide">
+          <div class="ad-modal-head">
+            <div class="ad-modal-title">Register New Member</div>
+            <button class="ad-modal-close" @click="showAdd=false">
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="15" y1="5" x2="5" y2="15"/><line x1="5" y1="5" x2="15" y2="15"/></svg>
             </button>
           </div>
-          <div class="modal-body">
+          <div class="ad-modal-body">
             <div v-if="addError" class="notice notice-err" style="margin-bottom:14px;"><span>✕</span><span>{{ addError }}</span></div>
             <div class="form-grid" style="margin-bottom:16px;">
               <div class="field"><label>First Name <span class="req">*</span></label><input type="text" class="f-input" v-model="addForm.firstName" /></div>
@@ -124,11 +128,68 @@
         </div>
       </div>
     </Teleport>
+    <!-- VIEW MODAL -->
+    <Teleport to="body">
+      <div v-if="viewing" class="ad-modal-root">
+        <div class="ad-modal-bg" @click="viewing=null" />
+        <div class="ad-modal">
+          <div class="ad-modal-head">
+            <div class="ad-modal-identity">
+              <div class="member-avatar member-av-init" style="width:46px;height:46px;font-size:17px;border:none;">
+                <img v-if="viewing.photoUrl" :src="viewing.photoUrl" :alt="viewing.firstName" style="width:100%;height:100%;object-fit:cover;" />
+                <span v-else>
+                  {{ viewing.firstName ? viewing.firstName[0] : '' }}{{ viewing.lastName ? viewing.lastName[0] : '' }}
+                </span>
+              </div>
+              <div>
+                <div class="ad-modal-name">{{ viewing.firstName }} {{ viewing.lastName }}</div>
+                <div class="ad-modal-email">{{ viewing.memberId || viewing.email }}</div>
+              </div>
+            </div>
+            <button class="ad-modal-close" @click="viewing=null">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="15" y1="5" x2="5" y2="15" />
+                <line x1="5" y1="5" x2="15" y2="15" />
+              </svg>
+            </button>
+          </div>
+          <div class="ad-modal-body">
+            <div class="ad-modal-grid">
+              <div v-for="[k,v] in modalFields" :key="k" class="detail-row" style="grid-column:span 1;">
+                <span class="detail-key">{{ k }}</span>
+                <span class="detail-value">
+                  <span v-if="k==='Status'" :class="`badge badge-${viewing.status}`">
+                    <span class="bdot"/>{{ viewing.status }}
+                  </span>
+                  <span v-else>{{ v || '—' }}</span>
+                </span>
+              </div>
+            </div>
+            <div v-if="viewing.motivation" class="ad-motivation">
+              <div class="ad-motivation-label">Motivation</div>
+              <p>{{ viewing.motivation }}</p>
+            </div>
+            <div v-if="viewing.status === 'pending'" class="ad-modal-actions">
+              <button class="btn btn-crimson" style="flex:1;" :disabled="acting === viewing.id" @click="approve(viewing)">
+                {{ acting === viewing.id ? 'Approving…' : '✓ Approve Member' }}
+              </button>
+              <button class="btn btn-danger btn-sm" :disabled="acting === viewing.id" @click="reject(viewing)">Reject</button>
+            </div>
+            <div v-else class="ad-modal-status-display">
+              <span :class="`badge badge-${viewing.status}`" style="font-size:13px;padding:7px 18px;">
+                <span class="bdot" />Member {{ viewing.status }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
 definePageMeta({ layout: 'dashboard', middleware: ['auth','admin'] })
+
 const toggleSidebar = inject<() => void>('toggleSidebar')
 const tabs = [{ k:'', l:'All' },{ k:'pending', l:'Pending' },{ k:'active', l:'Approved' },{ k:'inactive', l:'Rejected' }]
 const tab = ref(''), search = ref(''), loading = ref(false), acting = ref<number|null>(null)
@@ -137,7 +198,22 @@ const bgColors = ['#f0d9e0','#fdf3dc','#e0edd5','#dde9f9','#e9dff5']
 const txColors  = ['#6B0F1A','#8B5E00','#2D6A4F','#1a4f8a','#5E2D8A']
 const showAdd = ref(false), addLoading = ref(false), addError = ref('')
 const addForm = reactive({ firstName:'', lastName:'', email:'', phone:'', country:'', city:'', membershipType:'advocate', position:'advocate', password:'' })
+const viewing = ref<any>(null)
 
+const modalFields = computed(() => viewing.value ? [
+  ['Member ID',    viewing.value.memberId],
+  ['Status',       viewing.value.status],
+  ['Position',     viewing.value.position],
+  ['Type',         viewing.value.membershipType],
+  ['Phone',        viewing.value.phone],
+  ['Country',      viewing.value.country],
+  ['City',         viewing.value.city],
+  ['Occupation',   viewing.value.occupation],
+  ['Member Since', viewing.value.memberSince],
+  ['Registered',   viewing.value.createdAt ? new Date(viewing.value.createdAt).toLocaleDateString('en-GB') : '—'],
+] : [])
+
+function openView(m: any) { viewing.value = { ...m } }
 async function load() {
   loading.value = true
   try {
@@ -194,16 +270,25 @@ onMounted(load)
 @keyframes regSpin { to { transform: rotate(360deg); } }
 
 /* Modal */
-.modal-root { position: fixed; inset: 0; z-index: 400; display: flex; align-items: center; justify-content: center; padding: 16px; }
-.modal-bg   { position: absolute; inset: 0; background: rgba(26,0,5,.55); backdrop-filter: blur(4px); }
-.modal-box  { position: relative; background: var(--white); border-radius: 18px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(61,0,0,.22); }
-.modal-box--wide { max-width: 560px; }
-.modal-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border-light); background: var(--parchment); border-radius: 18px 18px 0 0; }
-.modal-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: var(--crimson); }
-.modal-close { background: none; border: none; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--muted2); cursor: pointer; transition: background .15s; }
-.modal-close svg { width: 15px; height: 15px; }
-.modal-close:hover { background: var(--border-light); }
-.modal-body { padding: 22px 24px; }
+.ad-modal-root  { position: fixed; inset: 0; z-index: 400; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.ad-modal-bg    { position: absolute; inset: 0; background: rgba(26,15,61,.55); backdrop-filter: blur(4px); }
+.ad-modal       { position: relative; background: var(--white); border-radius: 16px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(30,15,60,.25); }
+.ad-modal-wide  { max-width: 560px; }
+.ad-modal-head  { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border-light); background: var(--parchment); border-radius: 16px 16px 0 0; }
+.ad-modal-identity { display: flex; align-items: center; gap: 14px; }
+.ad-modal-name  { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--crimson); }
+.ad-modal-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: var(--crimson); }
+.ad-modal-email { font-size: 12px; color: var(--muted2); }
+.ad-modal-close { background: none; border: none; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--muted2); transition: background .15s; }
+.ad-modal-close:hover { background: var(--border-light); }
+.ad-modal-close svg { width: 16px; height: 16px; }
+.ad-modal-body  { padding: 22px 24px; }
+.ad-modal-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.ad-motivation  { margin-top: 16px; padding: 14px 16px; background: var(--parchment); border-radius: 10px; border: 1px solid var(--border-light); }
+.ad-motivation-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted2); margin-bottom: 6px; }
+.ad-motivation p { font-size: 14px; color: var(--text-mid); line-height: 1.65; }
+.ad-modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.ad-modal-status-display { margin-top: 16px; text-align: center; }
 
 /* Search icon override */
 .search-icon { display: flex; align-items: center; }
@@ -212,5 +297,6 @@ onMounted(load)
 @media (max-width: 640px) {
   .table-ctrl { flex-direction: column; gap: 10px; }
   .table-ctrl .search-wrap { max-width: none !important; }
+  .ad-modal-grid { grid-template-columns: 1fr; }
 }
 </style>
