@@ -1,40 +1,58 @@
 <template>
   <div>
     <div class="topbar">
-      <button class="topbar-menu" @click="toggleSidebar?.()">☰</button>
-      <h1 class="topbar-title">Reports</h1>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="topbar-menu" @click="toggleSidebar?.()">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="2" y1="5" x2="18" y2="5"/><line x1="2" y1="10" x2="18" y2="10"/><line x1="2" y1="15" x2="18" y2="15"/></svg>
+        </button>
+        <h1 class="topbar-title">Reports</h1>
+      </div>
       <div class="topbar-right">
         <button class="btn btn-outline btn-sm">⬇ Export CSV</button>
       </div>
     </div>
+
     <div class="page-body">
+
+      <!-- Summary stat cards with inline colour bars -->
       <div class="stats-grid" style="margin-bottom:28px;">
-        <div v-for="s in cards" :key="s.label" class="stat-card" :style="`border-top-color:${s.color}`">
+        <div v-for="s in cards" :key="s.label" class="stat-card rp-stat-card">
+          <div class="rp-stat-bar" :style="`background:${s.color}`" />
           <div class="stat-label">{{ s.label }}</div>
           <div class="stat-value" :style="`color:${s.color}`">{{ s.value }}</div>
           <div class="stat-note">{{ s.note }}</div>
         </div>
       </div>
+
       <div class="two-col">
+        <!-- By type -->
         <div class="card">
           <div class="card-header"><h3 class="card-title">By Membership Type</h3></div>
           <div class="card-body">
-            <div v-for="r in byType" :key="r.label" style="margin-bottom:16px;">
-              <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:5px;">
-                <span>{{ r.label }}</span><span><strong>{{ r.n }}</strong> ({{ r.pct }}%)</span>
+            <div v-for="r in byType" :key="r.label" class="rp-bar-row">
+              <div class="rp-bar-header">
+                <span class="rp-bar-label">{{ r.label }}</span>
+                <span class="rp-bar-count"><strong>{{ r.n }}</strong> <span class="rp-bar-pct">({{ r.pct }}%)</span></span>
               </div>
-              <div class="prog-bg"><div class="prog-fill" :style="`width:${r.pct}%;background:${r.color}`" /></div>
+              <div class="rp-bar-track">
+                <div class="rp-bar-fill" :style="`width:${r.pct}%;background:${r.color}`" />
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- By status -->
         <div class="card">
           <div class="card-header"><h3 class="card-title">By Status</h3></div>
           <div class="card-body">
-            <div v-for="r in byStatus" :key="r.label" style="margin-bottom:16px;">
-              <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:5px;">
-                <span>{{ r.label }}</span><span><strong>{{ r.n }}</strong> ({{ r.pct }}%)</span>
+            <div v-for="r in byStatus" :key="r.label" class="rp-bar-row">
+              <div class="rp-bar-header">
+                <span class="rp-bar-label">{{ r.label }}</span>
+                <span class="rp-bar-count"><strong>{{ r.n }}</strong> <span class="rp-bar-pct">({{ r.pct }}%)</span></span>
               </div>
-              <div class="prog-bg"><div class="prog-fill" :style="`width:${r.pct}%;background:${r.color}`" /></div>
+              <div class="rp-bar-track">
+                <div class="rp-bar-fill" :style="`width:${r.pct}%;background:${r.color}`" />
+              </div>
             </div>
           </div>
         </div>
@@ -47,7 +65,7 @@
 definePageMeta({ layout: 'dashboard', middleware: ['auth','admin'] })
 const toggleSidebar = inject<() => void>('toggleSidebar')
 const { data: stats } = await useFetch<any>('/api/admin/stats')
-const t = computed(() => (stats.value as any)?.total || 1)
+const t   = computed(() => (stats.value as any)?.total || 1)
 const pct = (n: number) => Math.round((n / t.value) * 100)
 
 const cards    = computed(() => [
@@ -67,3 +85,17 @@ const byStatus = computed(() => [
   { label:'Inactive', n:(stats.value as any)?.inactive??0, pct:pct((stats.value as any)?.inactive??0), color:'var(--muted)'   },
 ])
 </script>
+
+<style scoped>
+.rp-stat-card { position: relative; overflow: hidden; }
+.rp-stat-bar  { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+
+.rp-bar-row    { margin-bottom: 20px; }
+.rp-bar-row:last-child { margin-bottom: 0; }
+.rp-bar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; font-size: 14px; }
+.rp-bar-label  { color: var(--text); font-weight: 500; }
+.rp-bar-count  { color: var(--text); }
+.rp-bar-pct    { color: var(--muted2); font-size: 12px; }
+.rp-bar-track  { background: var(--parchment2); border-radius: 6px; height: 8px; overflow: hidden; }
+.rp-bar-fill   { height: 100%; border-radius: 6px; transition: width .6s cubic-bezier(.4,0,.2,1); min-width: 2px; }
+</style>

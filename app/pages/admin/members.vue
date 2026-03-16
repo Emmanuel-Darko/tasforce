@@ -2,7 +2,9 @@
   <div>
     <div class="topbar">
       <div style="display:flex;align-items:center;gap:12px;">
-        <button class="topbar-menu" @click="toggleSidebar?.()">☰</button>
+        <button class="topbar-menu" @click="toggleSidebar?.()">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="2" y1="5" x2="18" y2="5"/><line x1="2" y1="10" x2="18" y2="10"/><line x1="2" y1="15" x2="18" y2="15"/></svg>
+        </button>
         <h1 class="topbar-title">Members</h1>
       </div>
       <div class="topbar-right">
@@ -65,57 +67,55 @@
       </div>
     </div>
 
-    <!-- ── VIEW MEMBER MODAL ── -->
-    <div v-if="viewing" style="position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;padding:16px;">
-      <div style="position:absolute;inset:0;background:rgba(45,0,8,0.6);backdrop-filter:blur(4px);" @click="viewing=null" />
-      <div style="position:relative;background:var(--white);border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(61,0,0,0.3);">
-        <!-- Modal header -->
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border-light);background:var(--parchment);border-radius:16px 16px 0 0;">
-          <div style="display:flex;align-items:center;gap:14px;">
-            <div class="member-avatar member-av-init" style="width:46px;height:46px;font-size:17px;border:none;">
-              <img v-if="viewing.photoUrl" :src="viewing.photoUrl" :alt="viewing.firstName" style="width:100%;height:100%;object-fit:cover;" />
-              <span v-else>{{ viewing.firstName?.[0] }}{{ viewing.lastName?.[0] }}</span>
+    <!-- VIEW MODAL -->
+    <Teleport to="body">
+      <div v-if="viewing" class="ad-modal-root">
+        <div class="ad-modal-bg" @click="viewing=null" />
+        <div class="ad-modal">
+          <div class="ad-modal-head">
+            <div class="ad-modal-identity">
+              <div class="member-avatar member-av-init" style="width:46px;height:46px;font-size:17px;border:none;">
+                <img v-if="viewing.photoUrl" :src="viewing.photoUrl" :alt="viewing.firstName" style="width:100%;height:100%;object-fit:cover;" />
+                <span v-else>{{ viewing.firstName?.[0] }}{{ viewing.lastName?.[0] }}</span>
+              </div>
+              <div>
+                <div class="ad-modal-name">{{ viewing.firstName }} {{ viewing.lastName }}</div>
+                <div class="ad-modal-email">{{ viewing.email }}</div>
+              </div>
             </div>
-            <div>
-              <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--crimson);">{{ viewing.firstName }} {{ viewing.lastName }}</div>
-              <div style="font-size:12px;color:var(--muted2);">{{ viewing.email }}</div>
-            </div>
+            <button class="ad-modal-close" @click="viewing=null">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="15" y1="5" x2="5" y2="15"/><line x1="5" y1="5" x2="15" y2="15"/></svg>
+            </button>
           </div>
-          <button @click="viewing=null" style="background:none;border:none;font-size:20px;color:var(--muted2);cursor:pointer;padding:4px;line-height:1;">✕</button>
-        </div>
-
-        <!-- Modal body -->
-        <div style="padding:22px 24px;">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
-            <div v-for="[k,v] in modalFields" :key="k" class="detail-row" style="grid-column:span 1;">
-              <span class="detail-key">{{ k }}</span>
-              <span class="detail-value">
-                <span v-if="k==='Status'" :class="`badge badge-${viewing.status}`"><span class="bdot"/>{{ viewing.status }}</span>
-                <span v-else>{{ v || '—' }}</span>
+          <div class="ad-modal-body">
+            <div class="ad-modal-grid">
+              <div v-for="[k,v] in modalFields" :key="k" class="detail-row" style="grid-column:span 1;">
+                <span class="detail-key">{{ k }}</span>
+                <span class="detail-value">
+                  <span v-if="k==='Status'" :class="`badge badge-${viewing.status}`"><span class="bdot"/>{{ viewing.status }}</span>
+                  <span v-else>{{ v || '—' }}</span>
+                </span>
+              </div>
+            </div>
+            <div v-if="viewing.motivation" class="ad-motivation">
+              <div class="ad-motivation-label">Motivation</div>
+              <p>{{ viewing.motivation }}</p>
+            </div>
+            <div v-if="viewing.status === 'pending'" class="ad-modal-actions">
+              <button class="btn btn-crimson" style="flex:1;" :disabled="acting === viewing.id" @click="approveFromModal">
+                {{ acting === viewing.id ? 'Approving…' : '✓ Approve Member' }}
+              </button>
+              <button class="btn btn-danger btn-sm" :disabled="acting === viewing.id" @click="rejectFromModal">Reject</button>
+            </div>
+            <div v-else class="ad-modal-status-display">
+              <span :class="`badge badge-${viewing.status}`" style="font-size:13px;padding:7px 18px;">
+                <span class="bdot"/>Member {{ viewing.status }}
               </span>
             </div>
           </div>
-
-          <div v-if="viewing.motivation" style="margin-top:16px;padding:14px 16px;background:var(--parchment);border-radius:8px;border:1px solid var(--border-light);">
-            <div style="font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:6px;">Motivation</div>
-            <p style="font-size:14px;color:var(--text-mid);line-height:1.65;">{{ viewing.motivation }}</p>
-          </div>
-
-          <!-- Actions -->
-          <div v-if="viewing.status === 'pending'" style="display:flex;gap:10px;margin-top:20px;">
-            <button class="btn btn-crimson" style="flex:1;" :disabled="acting === viewing.id" @click="approveFromModal">
-              {{ acting === viewing.id ? 'Approving…' : '✓ Approve Member' }}
-            </button>
-            <button class="btn btn-danger btn-sm" :disabled="acting === viewing.id" @click="rejectFromModal">Reject</button>
-          </div>
-          <div v-else style="margin-top:16px;text-align:center;">
-            <span :class="`badge badge-${viewing.status}`" style="font-size:13px;padding:7px 18px;">
-              <span class="bdot"/>Member {{ viewing.status }}
-            </span>
-          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
@@ -160,20 +160,17 @@ async function approveFromModal() {
   try {
     await $fetch(`/api/admin/members/${viewing.value.id}/approve`, { method: 'POST' })
     viewing.value.status = 'active'
-    const r = rows.value.find(x => x.id === viewing.value.id)
-    if (r) r.status = 'active'
+    const r = rows.value.find(x => x.id === viewing.value.id); if (r) r.status = 'active'
   } catch (e: any) { alert(e?.data?.message || 'Error approving member') }
   finally { acting.value = null }
 }
-
 async function rejectFromModal() {
   if (!viewing.value || !confirm(`Reject ${viewing.value.firstName} ${viewing.value.lastName}?`)) return
   acting.value = viewing.value.id
   try {
     await $fetch(`/api/admin/members/${viewing.value.id}/reject`, { method: 'POST' })
     viewing.value.status = 'inactive'
-    const r = rows.value.find(x => x.id === viewing.value.id)
-    if (r) r.status = 'inactive'
+    const r = rows.value.find(x => x.id === viewing.value.id); if (r) r.status = 'inactive'
   } catch (e: any) { alert(e?.data?.message || 'Error rejecting member') }
   finally { acting.value = null }
 }
@@ -183,36 +180,42 @@ function exportCSV() {
   const csvRows = [
     headers.join(','),
     ...rows.value.map(m => [
-      m.id,
-      `"${m.firstName || ''}"`,
-      `"${m.lastName || ''}"`,
-      `"${m.email || ''}"`,
-      `"${m.phone || ''}"`,
-      `"${m.country || ''}"`,
-      `"${m.city || ''}"`,
-      `"${m.position || ''}"`,
-      `"${m.membershipType || ''}"`,
-      m.status,
-      m.memberId || '',
-      m.memberSince || '',
+      m.id, `"${m.firstName||''}"`, `"${m.lastName||''}"`, `"${m.email||''}"`,
+      `"${m.phone||''}"`, `"${m.country||''}"`, `"${m.city||''}"`, `"${m.position||''}"`,
+      `"${m.membershipType||''}"`, m.status, m.memberId||'', m.memberSince||'',
       m.createdAt ? new Date(m.createdAt).toLocaleDateString('en-GB') : '',
     ].join(','))
   ]
   const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
-  a.href = url
-  a.download = `tasforce-members-${new Date().toISOString().slice(0,10)}.csv`
-  a.click()
+  a.href = url; a.download = `tasforce-members-${new Date().toISOString().slice(0,10)}.csv`; a.click()
   URL.revokeObjectURL(url)
 }
 </script>
 
 <style scoped>
+.ad-modal-root  { position: fixed; inset: 0; z-index: 400; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.ad-modal-bg    { position: absolute; inset: 0; background: rgba(26,15,61,.55); backdrop-filter: blur(4px); }
+.ad-modal       { position: relative; background: var(--white); border-radius: 16px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(30,15,60,.25); }
+.ad-modal-head  { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border-light); background: var(--parchment); border-radius: 16px 16px 0 0; }
+.ad-modal-identity { display: flex; align-items: center; gap: 14px; }
+.ad-modal-name  { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--crimson); }
+.ad-modal-email { font-size: 12px; color: var(--muted2); }
+.ad-modal-close { background: none; border: none; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--muted2); transition: background .15s; }
+.ad-modal-close:hover { background: var(--border-light); }
+.ad-modal-close svg { width: 16px; height: 16px; }
+.ad-modal-body  { padding: 22px 24px; }
+.ad-modal-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.ad-motivation  { margin-top: 16px; padding: 14px 16px; background: var(--parchment); border-radius: 10px; border: 1px solid var(--border-light); }
+.ad-motivation-label { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted2); margin-bottom: 6px; }
+.ad-motivation p { font-size: 14px; color: var(--text-mid); line-height: 1.65; }
+.ad-modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+.ad-modal-status-display { margin-top: 16px; text-align: center; }
 @media (max-width: 640px) {
   .table-ctrl { flex-direction: column; align-items: stretch; gap: 12px; }
   .table-ctrl .search-wrap { max-width: none !important; }
   .table-ctrl .f-select { width: 100% !important; }
-  .member-cell { flex-direction: row; align-items: center; }
+  .ad-modal-grid { grid-template-columns: 1fr; }
 }
 </style>

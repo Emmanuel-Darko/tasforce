@@ -2,7 +2,9 @@
   <div>
     <div class="topbar no-print">
       <div style="display:flex;align-items:center;gap:12px;">
-        <button class="topbar-menu" @click="toggleSidebar?.()">☰</button>
+        <button class="topbar-menu" @click="toggleSidebar?.()">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="2" y1="5" x2="18" y2="5"/><line x1="2" y1="10" x2="18" y2="10"/><line x1="2" y1="15" x2="18" y2="15"/></svg>
+        </button>
         <h1 class="topbar-title">My Membership Card</h1>
       </div>
       <div class="topbar-right">
@@ -11,21 +13,25 @@
     </div>
 
     <div class="page-body">
-      <div v-if="user?.status !== 'active'" class="notice notice-warn no-print">
-        <span>⚠</span><span>Your membership card is not available until your application is approved.</span>
+      <div v-if="user?.status !== 'active'" class="dc-notice-warn no-print">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L2 17h16L10 2z"/><line x1="10" y1="9" x2="10" y2="12"/><circle cx="10" cy="15" r=".5" fill="currentColor"/></svg>
+        Your membership card is not available until your application is approved.
       </div>
 
       <template v-else>
-        <p class="no-print" style="font-size:15px;color:var(--muted);margin-bottom:28px;">
+        <p class="no-print dc-intro">
           Your official TAS-FORCE digital membership card. Present the QR code or barcode for identity verification.
         </p>
 
-        <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap;">
-          <div id="print-card-area">
-            <MembershipCard :member="user" />
+        <div class="dc-layout">
+          <div>
+            <div class="dc-card-label no-print">Preview</div>
+            <div id="print-card-area">
+              <MembershipCard :member="user" />
+            </div>
           </div>
 
-          <div class="no-print" style="flex:1;min-width:240px;">
+          <div class="no-print dc-sidebar">
             <div class="card" style="margin-bottom:16px;">
               <div class="card-header"><h3 class="card-title">Card Details</h3></div>
               <div class="card-body">
@@ -35,8 +41,8 @@
                 </div>
               </div>
             </div>
-            <div class="notice notice-info">
-              <span>ℹ</span>
+            <div class="dc-info-box">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><line x1="10" y1="9" x2="10" y2="14"/><circle cx="10" cy="6.5" r=".5" fill="currentColor"/></svg>
               <div>
                 <strong>Verification:</strong> Scan the QR code on the back or visit:<br/>
                 <code style="font-size:12px;">tas-force.org/verify/{{ user?.memberId }}</code>
@@ -328,6 +334,15 @@ function printCard() {
 }
 </script>
 
-<style>
+
+<style scoped>
+.dc-intro { font-size: 15px; color: var(--muted); margin-bottom: 28px; }
+.dc-layout { display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap; }
+.dc-card-label { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--muted2); margin-bottom: 8px; }
+.dc-sidebar { flex: 1; min-width: 240px; }
+.dc-notice-warn { display: flex; align-items: center; gap: 12px; padding: 13px 18px; background: #fef9ec; border: 1.5px solid #f0d060; border-radius: 12px; font-size: 14px; color: #6b4800; margin-bottom: 20px; }
+.dc-notice-warn svg { width: 18px; height: 18px; flex-shrink: 0; }
+.dc-info-box { display: flex; align-items: flex-start; gap: 10px; padding: 13px 16px; background: #f0f4ff; border: 1.5px solid #c0d0f8; border-radius: 10px; font-size: 14px; color: #1a3a80; line-height: 1.6; }
+.dc-info-box svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
 @media print { .no-print { display: none !important; } }
 </style>

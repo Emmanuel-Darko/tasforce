@@ -2,7 +2,9 @@
   <div>
     <div class="topbar no-print">
       <div style="display:flex;align-items:center;gap:12px;">
-        <button class="topbar-menu" @click="toggleSidebar?.()">☰</button>
+        <button class="topbar-menu" @click="toggleSidebar?.()">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="2" y1="5" x2="18" y2="5"/><line x1="2" y1="10" x2="18" y2="10"/><line x1="2" y1="15" x2="18" y2="15"/></svg>
+        </button>
         <h1 class="topbar-title">Membership Cards</h1>
       </div>
       <div class="topbar-right">
@@ -13,35 +15,34 @@
     </div>
 
     <div class="page-body">
-      <p class="no-print" style="font-size:15px;color:var(--muted);margin-bottom:24px;">
-        View, print and manage membership cards for all active members.
-      </p>
+      <p class="no-print ac-intro">View, print and manage membership cards for all active members.</p>
 
-      <div v-if="loading" style="text-align:center;padding:60px;color:var(--muted);">Loading cards…</div>
-
-      <div v-else-if="!members.length" class="notice notice-info">
-        <span>ℹ</span><span>No active members with cards yet. Approve some registrations first.</span>
+      <div v-if="loading" class="ac-loading">
+        <div class="ac-spinner" />
+        Loading cards…
       </div>
 
-      <div v-else class="qr-grid">
-        <div v-for="m in members" :key="m.id" class="card" style="padding:16px;text-align:center;">
-          <!-- Scaled preview -->
-          <div style="transform:scale(0.6);transform-origin:top center;margin-bottom:-90px;">
-            <MembershipCard :member="m" />
-          </div>
+      <div v-else-if="!members.length" class="ac-empty-notice">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8"/><line x1="10" y1="9" x2="10" y2="14"/><circle cx="10" cy="6.5" r=".5" fill="currentColor"/></svg>
+        No active members with cards yet. Approve some registrations first.
+      </div>
 
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;">{{ m.memberId }}</div>
-          <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:var(--crimson);margin-bottom:10px;">
-            {{ m.firstName }} {{ m.lastName }}
+      <div v-else class="ac-grid">
+        <div v-for="m in members" :key="m.id" class="ac-card-tile">
+          <div class="ac-preview-wrap">
+            <div style="transform:scale(0.58);transform-origin:top center;margin-bottom:-92px;">
+              <MembershipCard :member="m" />
+            </div>
           </div>
-
-          <div style="display:flex;gap:6px;justify-content:center;">
-            <button class="btn btn-crimson btn-sm" @click="printSingle(m)">🖨 Print</button>
+          <div class="ac-card-meta">
+            <div class="ac-card-id">{{ m.memberId }}</div>
+            <div class="ac-card-name">{{ m.firstName }} {{ m.lastName }}</div>
+            <button class="btn btn-crimson btn-sm ac-print-btn" @click="printSingle(m)">🖨 Print</button>
           </div>
         </div>
       </div>
 
-      <!-- Hidden render area: one MembershipCard per member for DOM extraction -->
+      <!-- Hidden render pool -->
       <div id="hidden-card-pool" style="position:absolute;left:-9999px;top:0;visibility:hidden;pointer-events:none;">
         <div v-for="m in members" :key="`pool-${m.id}`" :id="`card-pool-${m.id}`">
           <MembershipCard :member="m" />
@@ -281,5 +282,20 @@ function printAll() {
 </script>
 
 <style>
+.ac-intro { font-size: 15px; color: var(--muted); margin-bottom: 24px; }
+.ac-loading { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 60px; color: var(--muted); font-size: 15px; }
+.ac-spinner { width: 24px; height: 24px; border: 2.5px solid var(--border); border-top-color: var(--crimson); border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.ac-empty-notice { display: flex; align-items: center; gap: 12px; padding: 16px 20px; background: #f0f4ff; border: 1.5px solid #c0d0f8; border-radius: 12px; font-size: 14px; color: #1a3a80; }
+.ac-empty-notice svg { width: 18px; height: 18px; flex-shrink: 0; }
+.ac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px; }
+.ac-card-tile { background: var(--white); border: 1px solid var(--border-light); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm); transition: box-shadow .2s, transform .2s; }
+.ac-card-tile:hover { box-shadow: var(--shadow-card); transform: translateY(-3px); }
+.ac-preview-wrap { background: var(--parchment); padding: 16px 16px 0; overflow: hidden; height: 160px; }
+.ac-card-meta { padding: 14px 16px 16px; text-align: center; }
+.ac-card-id   { font-family: monospace; font-size: 11px; color: var(--muted2); margin-bottom: 4px; }
+.ac-card-name { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 600; color: var(--crimson); margin-bottom: 12px; }
+.ac-print-btn { width: 100%; justify-content: center; }
 @media print { .no-print { display: none !important; } }
+@media (max-width: 640px) { .ac-grid { grid-template-columns: 1fr 1fr; gap: 14px; } }
 </style>

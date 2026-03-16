@@ -1,27 +1,41 @@
 <template>
   <div>
     <div class="topbar">
-      <button class="topbar-menu" @click="toggleSidebar?.()">☰</button>
-      <h1 class="topbar-title">Settings</h1>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="topbar-menu" @click="toggleSidebar?.()">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="2" y1="5" x2="18" y2="5"/><line x1="2" y1="10" x2="18" y2="10"/><line x1="2" y1="15" x2="18" y2="15"/></svg>
+        </button>
+        <h1 class="topbar-title">Settings</h1>
+      </div>
       <div class="topbar-right">
-        <button class="btn btn-crimson btn-sm" @click="saved = true; setTimeout(() => saved = false, 3000)">Save Changes</button>
+        <button class="btn btn-crimson btn-sm" @click="save">Save Changes</button>
       </div>
     </div>
+
     <div class="page-body">
-      <div v-if="saved" class="notice notice-ok"><span>✦</span><span>Settings saved successfully.</span></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+
+      <Transition name="st-slide">
+        <div v-if="saved" class="st-saved-banner">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 4 7.5 13 4 9.5"/></svg>
+          Settings saved successfully.
+        </div>
+      </Transition>
+
+      <div class="st-grid">
+
         <div class="card">
           <div class="card-header"><h3 class="card-title">Organisation</h3></div>
-          <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+          <div class="card-body st-fields">
             <div class="field"><label>Organisation Name</label><input type="text" class="f-input" value="TAS-FORCE" /></div>
             <div class="field"><label>Full Name</label><input type="text" class="f-input" value="Truth and Advocacy for Serwah & Women Empowerment" /></div>
             <div class="field"><label>Email</label><input type="email" class="f-input" value="info@tas-force.org" /></div>
             <div class="field"><label>Website</label><input type="url" class="f-input" value="www.tas-force.org" /></div>
           </div>
         </div>
+
         <div class="card">
           <div class="card-header"><h3 class="card-title">Registration Settings</h3></div>
-          <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+          <div class="card-body st-fields">
             <div class="field">
               <label>Registration Status</label>
               <select class="f-select"><option>Open — Accepting applications</option><option>Closed — Not accepting</option></select>
@@ -32,22 +46,25 @@
             </div>
           </div>
         </div>
+
         <div class="card">
           <div class="card-header"><h3 class="card-title">Email Notifications</h3></div>
-          <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+          <div class="card-body st-fields">
             <div class="field"><label>Sender Name</label><input type="text" class="f-input" value="TAS-FORCE" /></div>
             <div class="field"><label>From Email</label><input type="email" class="f-input" placeholder="noreply@tas-force.org" /></div>
             <div class="field"><label>Admin Notification Email</label><input type="email" class="f-input" placeholder="admin@tas-force.org" /></div>
           </div>
         </div>
+
         <div class="card">
           <div class="card-header"><h3 class="card-title">Change Password</h3></div>
-          <div class="card-body" style="display:flex;flex-direction:column;gap:14px;">
+          <div class="card-body st-fields">
             <div class="field"><label>Current Password</label><input type="password" class="f-input" /></div>
             <div class="field"><label>New Password</label><input type="password" class="f-input" /></div>
             <div class="field"><label>Confirm New Password</label><input type="password" class="f-input" /></div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -57,4 +74,27 @@
 definePageMeta({ layout: 'dashboard', middleware: ['auth','admin'] })
 const toggleSidebar = inject<() => void>('toggleSidebar')
 const saved = ref(false)
+function save() {
+  saved.value = true
+  setTimeout(() => { saved.value = false }, 3200)
+}
 </script>
+
+<style scoped>
+.st-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.st-fields { display: flex; flex-direction: column; gap: 14px; }
+
+.st-saved-banner {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 18px; background: #e8f5ee;
+  border: 1.5px solid #98d4b0; border-radius: 12px;
+  font-size: 14px; color: #1f5e3a; margin-bottom: 20px;
+}
+.st-saved-banner svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+/* Transition */
+.st-slide-enter-active, .st-slide-leave-active { transition: all .28s; }
+.st-slide-enter-from, .st-slide-leave-to { opacity: 0; transform: translateY(-8px); }
+
+@media (max-width: 768px) { .st-grid { grid-template-columns: 1fr; } }
+</style>
